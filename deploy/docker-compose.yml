@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  postgres:
+    image: postgres:13
+    container_name: quant-postgres
+    environment:
+      POSTGRES_DB: quant_db
+      POSTGRES_USER: quant_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - quant_network
+
+  # Redis 缓存
+  redis:
+    image: redis:6
+    container_name: quant-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - quant_network
+
+  # 后端 API 服务
+  backend:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile.backend
+    container_name: quant-backend
+    environment:
+      - DATABASE_URL=postgresql://quant_user:${DB_PASSWORD}@postgres:5432/quant_db
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - JWT_SECRET=${JWT_SECRET}
+      - ENVIRONMENT=production
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8000:8000"
+    networks:
+      - quant_network
+
+  # WebSocket 服务
+  websocket:
+    build:
+      context: ../
+      dockerfile: deploy/Dockerfile.websocket
+    container_name: quant-websocket
+    environment:
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+    depends_on:
+      - redis
+    ports:
+      - "8001:8001"
+    networks:
+      - quant_network
+
+  # 监控服务
+  prometheus:
+    image: prom/prometheus
+    container_name: quant-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - quant_network
+
+  grafana:
+    image: grafana/grafana
+    container_name: quant-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - quant_network
+
+networks:
+  quant_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data: 

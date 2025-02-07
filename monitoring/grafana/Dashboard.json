@@ -1,0 +1,17 @@
+{
+    "dashboard": {
+      "title": "Quant Backend Dashboard",
+      "panels": [
+        {
+          "type": "graph",
+          "title": "API Request Duration",
+          "targets": [
+            {
+              "target": "quant_backend_request_duration_seconds"
+            }
+          ]
+        }
+      ]
+    }
+  }
+  

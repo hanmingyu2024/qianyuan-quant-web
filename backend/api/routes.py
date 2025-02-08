@@ -3,7 +3,7 @@ import sys
 import logging
 from datetime import datetime
 from flask import Blueprint, request, jsonify
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ValidationError, Field
 from typing import Any, Dict, Optional, List
 from backend.services.trading_service import TradingService
 from backend.services.strategy_service import StrategyService
@@ -59,6 +59,35 @@ class RunBacktestInput(BaseModel):
     start_date: str
     end_date: str
     initial_capital: Optional[float] = 100000
+
+class LoginRequest(BaseModel):
+    username: str = Field(..., description="用户名")
+    password: str = Field(..., description="密码")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "username": "test_user",
+                "password": "test_password"
+            }
+        }
+
+class StrategyCreate(BaseModel):
+    name: str = Field(..., description="策略名称")
+    symbol: str = Field(..., description="交易品种代码")
+    parameters: dict = Field(..., description="策略参数")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "双均线策略",
+                "symbol": "rb9999",
+                "parameters": {
+                    "fast_period": 5,
+                    "slow_period": 20
+                }
+            }
+        }
 
 # -----------------------------
 # API 路由定义
@@ -178,54 +207,96 @@ router = APIRouter(
     tags=["交易接口"]
 )
 
-@router.post("/market/subscribe", 
-    summary="订阅市场数据",
-    description="订阅指定合约的实时行情数据，支持股票、期货等",
-    response_description="订阅结果"
+@router.post("/auth/token",
+    summary="用户登录",
+    description="获取访问令牌",
+    tags=["认证接口"]
+)
+async def login(request: LoginRequest):
+    """
+    用户登录接口
+    
+    返回:
+    - access_token: 访问令牌
+    - token_type: 令牌类型
+    """
+    return {"access_token": "示例token", "token_type": "bearer"}
+
+@router.post("/market/subscribe",
+    summary="订阅行情",
+    description="订阅指定合约的实时行情数据",
+    tags=["行情接口"]
 )
 async def subscribe_market_data(
     symbols: List[str] = Query(..., description="合约代码列表，例如：['rb9999']"),
-    market_type: str = Query("cn_stocks", description="市场类型：cn_stocks(股票)、cn_futures(期货)等")
+    market_type: str = Query("cn_stocks", description="市场类型：cn_stocks(股票)、cn_futures(期货)")
 ):
-    """
-    订阅市场数据接口
-    
-    参数:
-    - symbols: 合约代码列表，最多支持30个
-    - market_type: 市场类型，支持：cn_stocks(股票)、cn_futures(期货)等
-    
-    返回:
-    - 订阅成功或失败的状态信息
-    """
+    """订阅市场数据"""
     try:
         await market_data_service.subscribe(symbols, market_type)
-        return {"code": 200, "message": "订阅成功"}
+        return {
+            "code": 200,
+            "message": "订阅成功",
+            "data": {
+                "symbols": symbols,
+                "market_type": market_type
+            }
+        }
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/strategies/", 
+@router.get("/strategies",
     summary="获取策略列表",
-    description="获取当前用户的所有交易策略列表"
+    description="获取当前用户的所有交易策略",
+    tags=["策略接口"]
 )
 async def list_strategies():
     """获取策略列表"""
-    return {"message": "获取策略列表"}
+    return {
+        "code": 200,
+        "message": "获取成功",
+        "data": [
+            {
+                "id": 1,
+                "name": "双均线策略",
+                "symbol": "rb9999",
+                "status": "running"
+            }
+        ]
+    }
 
-@router.post("/strategies/", 
-    summary="创建新策略",
-    description="创建一个新的交易策略"
+@router.post("/strategies",
+    summary="创建策略",
+    description="创建新的交易策略",
+    tags=["策略接口"]
 )
-async def create_strategy():
+async def create_strategy(strategy: StrategyCreate):
     """创建新策略"""
-    return {"message": "创建新策略"}
+    return {
+        "code": 200,
+        "message": "创建成功",
+        "data": {
+            "strategy_id": 1
+        }
+    }
 
-@router.post("/trades/execute", 
+@router.post("/trades/execute",
     summary="执行交易",
-    description="执行交易操作，支持市价单和限价单"
+    description="执行交易操作",
+    tags=["交易接口"]
 )
-async def execute_trade():
+async def execute_trade(
+    symbol: str = Query(..., description="交易品种代码"),
+    direction: str = Query(..., description="交易方向：buy/sell"),
+    volume: float = Query(..., description="交易数量"),
+    price: Optional[float] = Query(None, description="交易价格，市价单可不填")
+):
     """执行交易"""
-    return {"message": "执行交易"}
+    return {
+        "code": 200,
+        "message": "下单成功",
+        "data": {
+            "order_id": "123456"
+        }
+    }
 

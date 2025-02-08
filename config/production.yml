@@ -1,0 +1,5 @@
+# config/production.yml
+
+database:
+  host: prod.db.host
+  port: 3306

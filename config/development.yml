@@ -1,0 +1,5 @@
+# config/development.yml
+
+database:
+  host: dev.db.host
+  port: 3306

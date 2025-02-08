@@ -6,9 +6,9 @@ services:
     image: postgres:13
     container_name: quant-postgres
     environment:
-      POSTGRES_DB: quant_db
-      POSTGRES_USER: quant_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: quant
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -31,12 +31,12 @@ services:
   # 后端 API 服务
   backend:
     build:
-      context: ../
+      context: .
       dockerfile: deploy/Dockerfile.backend
     container_name: quant-backend
     environment:
-      - DATABASE_URL=postgresql://quant_user:${DB_PASSWORD}@postgres:5432/quant_db
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/0
+      - DATABASE_URL=postgresql://user:password@postgres:5432/quant
+      - REDIS_URL=redis://redis:6379/0
       - JWT_SECRET=${JWT_SECRET}
       - ENVIRONMENT=production
     depends_on:

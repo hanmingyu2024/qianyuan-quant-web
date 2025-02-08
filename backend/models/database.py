@@ -17,9 +17,9 @@ class User(Base):
     __tablename__ = 'users'
     
     id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(120), unique=True, nullable=False)
-    password_hash = Column(String(128))
+    username = Column(String, unique=True)
+    email = Column(String, unique=True)
+    hashed_password = Column(String)
     api_key = Column(String(64), unique=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
@@ -31,11 +31,11 @@ class Strategy(Base):
     __tablename__ = 'strategies'
     
     id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
-    description = Column(String(500))
-    user_id = Column(Integer, ForeignKey('users.id'))
-    status = Column(String(20), default='INACTIVE')
-    parameters = Column(String(1000))  # JSON格式存储策略参数
+    name = Column(String)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    type = Column(String)
+    parameters = Column(String)  # JSON格式的策略参数
+    status = Column(String)  # ACTIVE, INACTIVE, TESTING
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.utcnow)
     

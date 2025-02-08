@@ -1,8 +1,19 @@
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Enum
+from sqlalchemy import (
+    Column, Integer, String, Float, DateTime, ForeignKey, 
+    Enum, Index, Numeric, Boolean, create_engine
+)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, sessionmaker
 from datetime import datetime
 import enum
+
+# 使用 SQLite
+SQLALCHEMY_DATABASE_URL = "sqlite:///./quant.db"
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
@@ -70,11 +81,11 @@ class MarketData(Base):
     id = Column(Integer, primary_key=True)
     symbol = Column(String(20), nullable=False)
     timestamp = Column(DateTime, nullable=False)
-    open = Column(Float, nullable=False)
-    high = Column(Float, nullable=False)
-    low = Column(Float, nullable=False)
-    close = Column(Float, nullable=False)
-    volume = Column(Float, nullable=False)
+    open = Column(Numeric(precision=18, scale=8), nullable=False)
+    high = Column(Numeric(precision=18, scale=8), nullable=False)
+    low = Column(Numeric(precision=18, scale=8), nullable=False)
+    close = Column(Numeric(precision=18, scale=8), nullable=False)
+    volume = Column(Numeric(precision=18, scale=8), nullable=False)
     
     __table_args__ = (
         # 创建复合索引

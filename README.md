@@ -5,7 +5,7 @@
 首先，克隆该项目到本地：
 
 ```bash
-git clone https://github.com/yourusername/qianyuan-quant-enterprise.git
+git clone https://github.com/hanmingyu2024/qianyuan-quant-web.git
 cd qianyuan-quant-enterprise
 ```
 

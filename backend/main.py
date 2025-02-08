@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.routes import router as api_router
+from backend.api.routes import router as api_router
+from backend.api.auth import router as auth_router
 from services.market_data_service import MarketDataService
 from services.execution_engine import ExecutionEngine
 from services.risk_control_service import RiskControlService
@@ -27,6 +28,7 @@ execution_engine = ExecutionEngine(market_data_service, risk_service, config)
 
 # 注册路由
 app.include_router(api_router, prefix="/api/v1")
+app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
 
 @app.on_event("startup")
 async def startup():

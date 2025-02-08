@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.poetry]
+name = "qianyuan-quant-enterprise"
+version = "0.1.0"
+description = "乾元量化交易系统"
+authors = ["Han Mingyu <13364694109ai@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.115.8"
+numpy = "^1.21.6"
+pandas = "^2.2.3"
+
+[tool.poetry.dev-dependencies]
+pytest = "^8.3.4"
+pytest-cov = "^4.0.0"
+flake8 = "^7.1.1"
+
+[tool.black]
+line-length = 88
+target-version = ["py39"]
+
+[tool.isort]
+profile = "black"

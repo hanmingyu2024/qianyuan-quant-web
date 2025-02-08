@@ -4,47 +4,41 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
 
 # 虚拟环境
-venv/
-ENV/
+.venv/
 
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
+# 构建文件
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+lib/
+lib64/
+wheels/
+parts/
 
-# 日志
+# 日志文件
 *.log
 logs/
+*.out
+*.err
 
-# 环境变量
+# IDE 配置
+.vscode/
+.idea/
+
+# 环境变量文件
 .env
 .env.*
+
+# Docker
+.docker/
 
 # 数据库
 *.sqlite3
 *.db
-
-# Docker
-.docker/
 
 # 系统文件
 .DS_Store
@@ -65,4 +59,7 @@ data/
 
 # 测试覆盖率报告
 .coverage
-htmlcov/ 
+htmlcov/
+
+# pip 环境
+pip-wheel-metadata/

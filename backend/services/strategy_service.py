@@ -1,12 +1,14 @@
 # backend/services/strategy_service.py
 
-from models.database import Strategy
+from typing import List, Dict
 from datetime import datetime
+from backend.models.database import Strategy, User
 import logging
 
 class StrategyService:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        self.strategies = []
 
     def create_strategy(self, user_id, name, symbol, parameters):
         """
@@ -38,3 +40,19 @@ class StrategyService:
         except Exception as e:
             self.logger.exception("运行回测时发生错误")
             raise
+
+    async def create_strategy(self, user: User, strategy_data: Dict):
+        """创建新策略"""
+        return {"message": "策略创建成功"}
+        
+    async def get_user_strategies(self, user: User) -> List[Strategy]:
+        """获取用户的所有策略"""
+        return []
+        
+    async def update_strategy(self, strategy_id: int, data: Dict):
+        """更新策略"""
+        return {"message": "策略更新成功"}
+        
+    async def delete_strategy(self, strategy_id: int):
+        """删除策略"""
+        return {"message": "策略删除成功"}

@@ -1,11 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.api.routes import router as api_router
 from backend.api.auth import router as auth_router
-from services.market_data_service import MarketDataService
-from services.execution_engine import ExecutionEngine
-from services.risk_control_service import RiskControlService
-from config.config_manager import ConfigManager
+from backend.api.routes import router as api_router
+from backend.services.market_data_service import MarketDataService
+from backend.services.execution_engine import ExecutionEngine
+from backend.services.risk_control_service import RiskControlService
+from backend.config.config_manager import ConfigManager
 
 app = FastAPI(title="乾元量化交易系统")
 
@@ -27,8 +27,8 @@ risk_service = RiskControlService(market_data_service, config)
 execution_engine = ExecutionEngine(market_data_service, risk_service, config)
 
 # 注册路由
-app.include_router(api_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(api_router, prefix="/api/v1", tags=["api"])
 
 @app.on_event("startup")
 async def startup():

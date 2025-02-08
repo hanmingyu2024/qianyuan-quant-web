@@ -7,9 +7,9 @@ from decimal import Decimal
 from enum import Enum
 from dataclasses import dataclass
 from sqlalchemy.orm import Session
-from models.database import Order, Trade, Position
-from services.market_data_service import MarketDataService
-from services.risk_service import RiskService
+from backend.models.database import Order, Trade, Position, SessionLocal
+from backend.services.market_data_service import MarketDataService
+from backend.services.risk_control_service import RiskControlService
 from config.config_manager import ConfigManager
 
 class OrderStatus(Enum):
@@ -42,17 +42,13 @@ class OrderRequest:
     user_id: int = None
 
 class ExecutionEngine:
-    def __init__(
-        self,
-        market_data_service: MarketDataService,
-        risk_service: RiskService,
-        config: ConfigManager,
-        db_session: Session
-    ):
+    def __init__(self, market_data_service: MarketDataService, risk_service: RiskControlService, config: Dict):
         self.market_data_service = market_data_service
         self.risk_service = risk_service
         self.config = config
-        self.db_session = db_session
+        self.orders = []
+        self.positions = {}
+        self.db = SessionLocal()
         self.logger = logging.getLogger(__name__)
         
         # 订单管理
@@ -115,8 +111,8 @@ class ExecutionEngine:
             )
             
             # 保存订单到数据库
-            self.db_session.add(order)
-            self.db_session.commit()
+            self.db.add(order)
+            self.db.commit()
             
             # 添加到活动订单
             self.active_orders[order_id] = order
@@ -128,7 +124,7 @@ class ExecutionEngine:
             
         except Exception as e:
             self.logger.error(f"Error submitting order: {str(e)}")
-            self.db_session.rollback()
+            self.db.rollback()
             return False, f"Error submitting order: {str(e)}", None
 
     async def cancel_order(self, order_id: str) -> Tuple[bool, str]:
@@ -146,7 +142,7 @@ class ExecutionEngine:
             order.updated_at = datetime.utcnow()
             
             # 更新数据库
-            self.db_session.commit()
+            self.db.commit()
             
             # 从活动订单中移除
             del self.active_orders[order_id]
@@ -155,7 +151,7 @@ class ExecutionEngine:
             
         except Exception as e:
             self.logger.error(f"Error cancelling order: {str(e)}")
-            self.db_session.rollback()
+            self.db.rollback()
             return False, f"Error cancelling order: {str(e)}"
 
     async def _process_order_queue(self):
@@ -218,17 +214,17 @@ class ExecutionEngine:
             await self._update_position(order, trade)
             
             # 保存到数据库
-            self.db_session.add(trade)
-            self.db_session.commit()
+            self.db.add(trade)
+            self.db.commit()
             
             # 从活动订单中移除
             del self.active_orders[order.order_id]
             
         except Exception as e:
             self.logger.error(f"Error executing market order: {str(e)}")
-            self.db_session.rollback()
+            self.db.rollback()
             order.status = OrderStatus.REJECTED.value
-            self.db_session.commit()
+            self.db.commit()
 
     async def _execute_limit_order(self, order: Order, current_price: Decimal):
         """执行限价单"""
@@ -255,7 +251,7 @@ class ExecutionEngine:
     async def _update_position(self, order: Order, trade: Trade):
         """更新持仓"""
         try:
-            position = self.db_session.query(Position).filter(
+            position = self.db.query(Position).filter(
                 Position.user_id == order.user_id,
                 Position.symbol == order.symbol
             ).first()
@@ -267,7 +263,7 @@ class ExecutionEngine:
                     quantity=Decimal('0'),
                     average_price=Decimal('0')
                 )
-                self.db_session.add(position)
+                self.db.add(position)
             
             if order.side == OrderSide.BUY.value:
                 new_quantity = position.quantity + trade.quantity
@@ -279,13 +275,13 @@ class ExecutionEngine:
                 position.quantity -= trade.quantity
                 
             if position.quantity == 0:
-                self.db_session.delete(position)
+                self.db.delete(position)
                 
-            self.db_session.commit()
+            self.db.commit()
             
         except Exception as e:
             self.logger.error(f"Error updating position: {str(e)}")
-            raise
+            self.db.rollback()
 
     def _validate_order(self, order_request: OrderRequest) -> bool:
         """验证订单"""
@@ -321,7 +317,7 @@ class ExecutionEngine:
         """检查风险限制"""
         try:
             # 获取当前持仓
-            position = self.db_session.query(Position).filter(
+            position = self.db.query(Position).filter(
                 Position.user_id == order_request.user_id,
                 Position.symbol == order_request.symbol
             ).first()
@@ -365,4 +361,9 @@ class ExecutionEngine:
             if order.order_type == OrderType.LIMIT.value:
                 await self._execute_limit_order(order, current_price)
             elif order.order_type == OrderType.STOP.value:
-                await self._execute_stop_order(order, current_price) 
+                await self._execute_stop_order(order, current_price)
+
+    def __del__(self):
+        """析构函数中关闭数据库连接"""
+        if hasattr(self, 'db'):
+            self.db.close() 

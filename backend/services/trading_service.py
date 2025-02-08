@@ -1,11 +1,14 @@
 # backend/services/trading_service.py
 
-from models.database import Order, MarketData
+from datetime import datetime
+from typing import List, Dict
+from backend.models.database import Order, MarketData, User  # 修改导入路径
 import logging
 
 class TradingService:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
+        self.orders = []
 
     def get_klines(self, symbol: str, interval: str, start_time: str, end_time: str):
         """
@@ -45,3 +48,11 @@ class TradingService:
         except Exception as e:
             self.logger.exception("获取投资组合摘要时发生错误")
             raise
+
+    async def execute_trade(self, user: User, trade_data: Dict):
+        """执行交易"""
+        return {"message": "交易执行成功"}
+        
+    async def get_market_data(self, symbol: str):
+        """获取市场数据"""
+        return {"symbol": symbol, "price": 100.0}

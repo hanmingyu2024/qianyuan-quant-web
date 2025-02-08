@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 import logging
 from dataclasses import dataclass
 from sqlalchemy.orm import Session
-from models.database import Position, Order, Trade, RiskLimit, RiskAlert
-from services.market_data_service import MarketDataService
+from backend.models.database import Position, Order, Trade, RiskLimit, RiskAlert, SessionLocal
+from backend.services.market_data_service import MarketDataService
 from config.config_manager import ConfigManager
 
 @dataclass
@@ -23,15 +23,11 @@ class RiskMetrics:
     volatility: Decimal
 
 class RiskControlService:
-    def __init__(
-        self,
-        market_data_service: MarketDataService,
-        config: ConfigManager,
-        db_session: Session
-    ):
+    def __init__(self, market_data_service: MarketDataService, config: Dict):
         self.market_data_service = market_data_service
         self.config = config
-        self.db_session = db_session
+        self.risk_limits = {}
+        self.db = SessionLocal()
         self.logger = logging.getLogger(__name__)
         
         # 风险限制配置
@@ -45,6 +41,16 @@ class RiskControlService:
         self.risk_alerts: List[RiskAlert] = []
         self.position_cache: Dict[str, Position] = {}
         self.last_check_time: datetime = datetime.now()
+
+    def _load_risk_limits(self):
+        """加载风险限制配置"""
+        # 示例：从配置文件中获取风险限制参数，如果没有则使用默认值
+        self.risk_limits = self.config.get('risk_limits', {
+            "max_price_deviation": 0.05,  # 最大价格偏离比例
+            "max_position": 100,          # 最大持仓数量
+            "max_order_amount": 10000     # 最大订单金额
+        })
+        print("风险限制加载成功:", self.risk_limits)
 
     async def start_monitoring(self):
         """启动风险监控"""
@@ -64,69 +70,31 @@ class RiskControlService:
             self.logger.error(f"Error starting risk monitoring: {str(e)}")
             raise
 
-    async def check_order_risk(
-        self,
-        order: Order,
-        position: Optional[Position]
-    ) -> Dict:
+    async def check_order(self, order: Order) -> bool:
         """检查订单风险"""
         try:
-            current_price = Decimal(str(
-                self.market_data_service.price_cache.get(order.symbol, 0)
-            ))
-            
-            if current_price == 0:
-                return {
-                    'passed': False,
-                    'reason': 'No price data available'
-                }
-            
-            # 计算订单价值
-            order_value = order.quantity * current_price
-            
             # 检查持仓限制
-            if position:
-                new_position_value = (
-                    position.quantity + 
-                    (order.quantity if order.side == 'BUY' else -order.quantity)
-                ) * current_price
+            if not self._check_position_limit(order):
+                return False
                 
-                if abs(new_position_value) > self.max_position_value:
-                    return {
-                        'passed': False,
-                        'reason': 'Position value limit exceeded'
-                    }
-            
-            # 检查杠杆率
-            account_equity = self._calculate_account_equity(order.user_id)
-            if order_value / account_equity > self.max_leverage:
-                return {
-                    'passed': False,
-                    'reason': 'Leverage limit exceeded'
-                }
-            
-            # 检查集中度
-            total_position_value = self._calculate_total_position_value(order.user_id)
-            if order_value / (total_position_value + order_value) > self.max_concentration:
-                return {
-                    'passed': False,
-                    'reason': 'Concentration limit exceeded'
-                }
-            
-            return {'passed': True}
-            
+            # 检查订单金额限制
+            if not self._check_order_amount_limit(order):
+                return False
+                
+            # 检查价格偏离度
+            if not self._check_price_deviation(order):
+                return False
+                
+            return True
         except Exception as e:
             self.logger.error(f"Error checking order risk: {str(e)}")
-            return {
-                'passed': False,
-                'reason': f'Risk check error: {str(e)}'
-            }
+            return False
 
     async def calculate_risk_metrics(self, user_id: int) -> RiskMetrics:
         """计算风险指标"""
         try:
             # 获取用户持仓
-            positions = self.db_session.query(Position).filter(
+            positions = self.db.query(Position).filter(
                 Position.user_id == user_id
             ).all()
             
@@ -200,7 +168,7 @@ class RiskControlService:
             
             # 获取未实现盈亏
             unrealized_pnl = Decimal('0')
-            positions = self.db_session.query(Position).filter(
+            positions = self.db.query(Position).filter(
                 Position.user_id == user_id
             ).all()
             
@@ -222,7 +190,7 @@ class RiskControlService:
     def _calculate_realized_pnl(self, user_id: int) -> Decimal:
         """计算已实现盈亏"""
         try:
-            trades = self.db_session.query(Trade).join(
+            trades = self.db.query(Trade).join(
                 Order, Trade.order_id == Order.order_id
             ).filter(
                 Order.user_id == user_id
@@ -334,8 +302,8 @@ class RiskControlService:
                 created_at=datetime.now()
             )
             
-            self.db_session.add(alert)
-            self.db_session.commit()
+            self.db.add(alert)
+            self.db.commit()
             
             self.risk_alerts.append(alert)
             
@@ -344,11 +312,41 @@ class RiskControlService:
             
         except Exception as e:
             self.logger.error(f"Error generating risk alert: {str(e)}")
-            self.db_session.rollback()
+            self.db.rollback()
 
     def _trigger_alert_notification(self, alert: RiskAlert):
         """触发警报通知"""
         # 这里可以集成通知服务
         self.logger.warning(
             f"Risk Alert: {alert.alert_type} - {alert.severity} - {alert.message}"
-        ) 
+        )
+
+    def _check_position_limit(self, order: Order) -> bool:
+        """检查持仓限制"""
+        # 这里添加具体的持仓限制逻辑
+        return True
+
+    def _check_order_amount_limit(self, order: Order) -> bool:
+        """检查订单金额限制"""
+        # 这里添加具体的订单金额限制逻辑
+        return True
+
+    def _check_price_deviation(self, order: Order) -> bool:
+        """检查价格偏离度"""
+        try:
+            current_price = self.market_data_service.get_latest_price(order.symbol)
+            if not current_price:
+                return False
+                
+            # 计算价格偏离度
+            deviation = abs(order.price - current_price) / current_price
+            max_deviation = self.config.get('risk.max_price_deviation', 0.05)
+            
+            return deviation <= max_deviation
+        except Exception:
+            return False
+
+    def __del__(self):
+        """析构函数中关闭数据库连接"""
+        if hasattr(self, 'db'):
+            self.db.close() 

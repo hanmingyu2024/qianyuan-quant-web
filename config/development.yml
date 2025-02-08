@@ -1,5 +1,13 @@
 # config/development.yml
 
 database:
-  host: dev.db.host
-  port: 3306
+  url: "sqlite:///./quant.db"
+  pool_size: 20
+  max_overflow: 0
+
+redis:
+  host: localhost
+  port: 6379
+
+market_data:
+  websocket_url: wss://api.example.com/ws

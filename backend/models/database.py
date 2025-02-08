@@ -1,101 +1,112 @@
-from sqlalchemy import (
-    Column, Integer, String, Float, DateTime, ForeignKey, 
-    Enum, Index, Numeric, Boolean, create_engine
-)
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, Enum, Numeric, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy import create_engine
 from datetime import datetime
-import enum
 
-# 使用 SQLite
+# 创建数据库引擎
 SQLALCHEMY_DATABASE_URL = "sqlite:///./quant.db"
-
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
 )
+
+# 创建会话工厂
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-class OrderStatus(enum.Enum):
-    PENDING = "PENDING"
-    FILLED = "FILLED"
-    PARTIALLY_FILLED = "PARTIALLY_FILLED"
-    CANCELLED = "CANCELLED"
-    REJECTED = "REJECTED"
-
 class User(Base):
-    __tablename__ = 'users'
-    
+    __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True)
     email = Column(String, unique=True)
     hashed_password = Column(String)
-    api_key = Column(String(64), unique=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # 关联
     strategies = relationship("Strategy", back_populates="user")
     orders = relationship("Order", back_populates="user")
+    trades = relationship("Trade", back_populates="user")
+    positions = relationship("Position", back_populates="user")
 
 class Strategy(Base):
-    __tablename__ = 'strategies'
-    
+    __tablename__ = "strategies"
     id = Column(Integer, primary_key=True)
     name = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
     type = Column(String)
-    parameters = Column(String)  # JSON格式的策略参数
-    status = Column(String)  # ACTIVE, INACTIVE, TESTING
+    parameters = Column(String)
+    status = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, onupdate=datetime.utcnow)
-    
-    # 关联
     user = relationship("User", back_populates="strategies")
-    orders = relationship("Order", back_populates="strategy")
+
+class Trade(Base):
+    __tablename__ = "trades"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    order_id = Column(Integer, ForeignKey("orders.id"))
+    symbol = Column(String)
+    side = Column(String)  # BUY, SELL
+    quantity = Column(Numeric(precision=18, scale=8))
+    price = Column(Numeric(precision=18, scale=8))
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    user = relationship("User", back_populates="trades")
+    order = relationship("Order", back_populates="trades")
+
+class Position(Base):
+    __tablename__ = "positions"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    symbol = Column(String)
+    quantity = Column(Numeric(precision=18, scale=8))
+    avg_price = Column(Numeric(precision=18, scale=8))
+    last_update = Column(DateTime, default=datetime.utcnow)
+    user = relationship("User", back_populates="positions")
 
 class Order(Base):
-    __tablename__ = 'orders'
-    
+    __tablename__ = "orders"
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    strategy_id = Column(Integer, ForeignKey('strategies.id'))
-    symbol = Column(String(20), nullable=False)
-    order_type = Column(String(20), nullable=False)
-    side = Column(String(4), nullable=False)  # BUY/SELL
-    quantity = Column(Float, nullable=False)
-    price = Column(Float)
-    status = Column(Enum(OrderStatus), nullable=False, default=OrderStatus.PENDING)
-    filled_quantity = Column(Float, default=0)
-    average_price = Column(Float)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    strategy_id = Column(Integer, ForeignKey("strategies.id"))
+    symbol = Column(String)
+    order_type = Column(String)  # MARKET, LIMIT
+    side = Column(String)  # BUY, SELL
+    quantity = Column(Numeric(precision=18, scale=8))
+    price = Column(Numeric(precision=18, scale=8))
+    status = Column(String)  # PENDING, FILLED, CANCELLED
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, onupdate=datetime.utcnow)
-    
-    # 关联
+    filled_price = Column(Numeric(precision=18, scale=8))
+    filled_time = Column(DateTime)
     user = relationship("User", back_populates="orders")
-    strategy = relationship("Strategy", back_populates="orders")
+    trades = relationship("Trade", back_populates="order")
 
 class MarketData(Base):
-    __tablename__ = 'market_data'
-    
+    __tablename__ = "market_data"
     id = Column(Integer, primary_key=True)
-    symbol = Column(String(20), nullable=False)
-    timestamp = Column(DateTime, nullable=False)
-    open = Column(Numeric(precision=18, scale=8), nullable=False)
-    high = Column(Numeric(precision=18, scale=8), nullable=False)
-    low = Column(Numeric(precision=18, scale=8), nullable=False)
-    close = Column(Numeric(precision=18, scale=8), nullable=False)
-    volume = Column(Numeric(precision=18, scale=8), nullable=False)
-    
-    __table_args__ = (
-        # 创建复合索引
-        Index('idx_symbol_timestamp', 'symbol', 'timestamp'),
-    )
+    symbol = Column(String)
+    timestamp = Column(DateTime)
+    open = Column(Numeric(precision=18, scale=8))
+    high = Column(Numeric(precision=18, scale=8))
+    low = Column(Numeric(precision=18, scale=8))
+    close = Column(Numeric(precision=18, scale=8))
+    volume = Column(Numeric(precision=18, scale=8))
 
-def init_db(engine):
-    """初始化数据库"""
-    Base.metadata.create_all(engine)
+class RiskLimit(Base):
+    __tablename__ = "risk_limits"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    symbol = Column(String)
+    max_position = Column(Numeric(precision=18, scale=8))
+    max_order_amount = Column(Numeric(precision=18, scale=8))
+    max_daily_loss = Column(Numeric(precision=18, scale=8))
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    user = relationship("User", backref="risk_limits")
 
-def drop_db(engine):
-    """删除所有表"""
-    Base.metadata.drop_all(engine) 
+class RiskAlert(Base):
+    __tablename__ = "risk_alerts"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    alert_type = Column(String)  # POSITION_LIMIT, ORDER_AMOUNT, DAILY_LOSS
+    symbol = Column(String)
+    message = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    is_active = Column(Boolean, default=True)
+    user = relationship("User", backref="risk_alerts")

@@ -1,19 +1,16 @@
-from flask import Flask
-from flask_cors import CORS
-from api import api_blueprint
-from auth import auth_blueprint
-from config import Config
+from fastapi import FastAPI
+from backend.api import api_blueprint
 
-app = Flask(__name__)
-CORS(app)
+app = FastAPI()
 
-# 加载配置
-app.config.from_object(Config)
+# 使用 FastAPI 内置的方法注册路由
+app.include_router(api_blueprint, prefix='/api')
 
-# 注册蓝图
-app.register_blueprint(api_blueprint, url_prefix='/api')
-app.register_blueprint(auth_blueprint, url_prefix='/auth')
+@app.get("/")
+async def read_root():
+    return {"message": "Hello, World!"}
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("backend.app:app", host="127.0.0.1", port=8000, reload=True)
 

@@ -4,11 +4,13 @@ import logging
 from datetime import datetime
 from flask import Blueprint, request, jsonify
 from pydantic import BaseModel, ValidationError
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from backend.services.trading_service import TradingService
 from backend.services.strategy_service import StrategyService
 from backend.api.auth import get_current_user
-from models.database import User, Strategy, Order, MarketData
+from backend.models.database import User, Strategy, Order, MarketData
+from fastapi import APIRouter, Depends, HTTPException
+from backend.services.market_data_service import MarketDataService
 
 # 获取项目根目录的绝对路径并添加到 sys.path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -19,6 +21,7 @@ if project_root not in sys.path:
 api = Blueprint('api', __name__)
 trading_service = TradingService()
 strategy_service = StrategyService()
+market_data_service = MarketDataService()
 
 # 配置日志记录
 logger = logging.getLogger(__name__)
@@ -163,4 +166,45 @@ def run_backtest(strategy_id):
     except Exception as e:
         logger.exception("运行回测时发生错误")
         return error_response(str(e), 400)
+
+router = APIRouter()
+
+@router.post("/strategies/")
+async def create_strategy(
+    strategy_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """创建新策略"""
+    return {"message": "策略创建成功"}
+
+@router.get("/strategies/")
+async def list_strategies(
+    current_user: User = Depends(get_current_user)
+):
+    """获取用户的所有策略"""
+    return {"strategies": []}
+
+@router.post("/trades/execute")
+async def execute_trade(
+    trade_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    """执行交易"""
+    result = await trading_service.execute_trade(current_user, trade_data)
+    return result
+
+@router.post("/market/subscribe")
+async def subscribe_market_data(
+    symbols: List[str],
+    market_type: str = "cn_stocks",
+    current_user = Depends(get_current_user)
+):
+    """订阅市场数据"""
+    try:
+        await market_data_service.subscribe(symbols, market_type)
+        return {"code": 200, "message": "订阅成功"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 

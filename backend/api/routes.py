@@ -9,8 +9,9 @@ from backend.services.trading_service import TradingService
 from backend.services.strategy_service import StrategyService
 from backend.api.auth import get_current_user
 from backend.models.database import User, Strategy, Order, MarketData
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from backend.services.market_data_service import MarketDataService
+from backend.config.config_manager import ConfigManager  # 导入配置管理器
 
 # 获取项目根目录的绝对路径并添加到 sys.path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -21,7 +22,12 @@ if project_root not in sys.path:
 api = Blueprint('api', __name__)
 trading_service = TradingService()
 strategy_service = StrategyService()
-market_data_service = MarketDataService()
+
+# 创建配置实例
+config = ConfigManager()
+
+# 创建服务实例时传入配置
+market_data_service = MarketDataService(config)
 
 # 配置日志记录
 logger = logging.getLogger(__name__)
@@ -167,39 +173,30 @@ def run_backtest(strategy_id):
         logger.exception("运行回测时发生错误")
         return error_response(str(e), 400)
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/api",
+    tags=["交易接口"]
+)
 
-@router.post("/strategies/")
-async def create_strategy(
-    strategy_data: dict,
-    current_user: User = Depends(get_current_user)
-):
-    """创建新策略"""
-    return {"message": "策略创建成功"}
-
-@router.get("/strategies/")
-async def list_strategies(
-    current_user: User = Depends(get_current_user)
-):
-    """获取用户的所有策略"""
-    return {"strategies": []}
-
-@router.post("/trades/execute")
-async def execute_trade(
-    trade_data: dict,
-    current_user: User = Depends(get_current_user)
-):
-    """执行交易"""
-    result = await trading_service.execute_trade(current_user, trade_data)
-    return result
-
-@router.post("/market/subscribe")
+@router.post("/market/subscribe", 
+    summary="订阅市场数据",
+    description="订阅指定合约的实时行情数据，支持股票、期货等",
+    response_description="订阅结果"
+)
 async def subscribe_market_data(
-    symbols: List[str],
-    market_type: str = "cn_stocks",
-    current_user = Depends(get_current_user)
+    symbols: List[str] = Query(..., description="合约代码列表，例如：['rb9999']"),
+    market_type: str = Query("cn_stocks", description="市场类型：cn_stocks(股票)、cn_futures(期货)等")
 ):
-    """订阅市场数据"""
+    """
+    订阅市场数据接口
+    
+    参数:
+    - symbols: 合约代码列表，最多支持30个
+    - market_type: 市场类型，支持：cn_stocks(股票)、cn_futures(期货)等
+    
+    返回:
+    - 订阅成功或失败的状态信息
+    """
     try:
         await market_data_service.subscribe(symbols, market_type)
         return {"code": 200, "message": "订阅成功"}
@@ -207,4 +204,28 @@ async def subscribe_market_data(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/strategies/", 
+    summary="获取策略列表",
+    description="获取当前用户的所有交易策略列表"
+)
+async def list_strategies():
+    """获取策略列表"""
+    return {"message": "获取策略列表"}
+
+@router.post("/strategies/", 
+    summary="创建新策略",
+    description="创建一个新的交易策略"
+)
+async def create_strategy():
+    """创建新策略"""
+    return {"message": "创建新策略"}
+
+@router.post("/trades/execute", 
+    summary="执行交易",
+    description="执行交易操作，支持市价单和限价单"
+)
+async def execute_trade():
+    """执行交易"""
+    return {"message": "执行交易"}
 

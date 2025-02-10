@@ -25,6 +25,7 @@ dependencies = [
     "numpy>=1.26.4",
     "flask>=3.0.0",
     "pandas-ta>=0.3.14b0",
+    "PyYAML>=6.0.1",
 ]
 
 [project.optional-dependencies]
@@ -44,10 +45,11 @@ test = [
     "pandas>=2.2.0",
     "numpy>=1.26.4",
     "flask>=3.0.0",
+    "PyYAML>=6.0.1",
 ]
 
 [tool.setuptools]
-packages = ["backend"]
+packages = ["backend", "config"]
 
 [tool.black]
 line-length = 88

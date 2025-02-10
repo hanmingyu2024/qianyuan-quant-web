@@ -24,7 +24,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -e ".[test]"
-        pip install pandas numpy flask pandas-ta
+        pip install pandas numpy flask pandas-ta PyYAML
     
     - name: Run tests
       run: |

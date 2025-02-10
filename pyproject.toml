@@ -1,27 +1,43 @@
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=64.0.0", "wheel>=0.45.1"]
 build-backend = "setuptools.build_meta"
 
-[tool.poetry]
-name = "qianyuan-quant-enterprise"
+[project]
+name = "qianyuan-quant"
 version = "0.1.0"
 description = "乾元量化交易系统"
-authors = ["Han Mingyu <13364694109ai@gmail.com>"]
+authors = [
+    {name = "Han Mingyu", email = "13364694109ai@gmail.com"}
+]
+dependencies = [
+    "fastapi>=0.115.8",
+    "uvicorn>=0.34.0",
+    "numpy>=1.26.4",
+    "pandas>=2.2.3",
+    "SQLAlchemy>=1.4.23",
+    "python-jose>=3.3.0",
+    "python-multipart>=0.0.20",
+    "websockets>=14.2",
+    "python-dotenv>=1.0.1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-fastapi = "^0.115.8"
-numpy = "^1.21.6"
-pandas = "^2.2.3"
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-cov>=4.1.0",
+    "flake8>=7.1.1",
+    "black>=24.2.0",
+    "isort>=5.13.2",
+]
 
-[tool.poetry.dev-dependencies]
-pytest = "^8.3.4"
-pytest-cov = "^4.0.0"
-flake8 = "^7.1.1"
+[tool.setuptools]
+packages = ["backend"]
 
 [tool.black]
 line-length = 88
-target-version = ["py39"]
+target-version = ["py39", "py310", "py311"]
+include = '\.pyi?$'
 
 [tool.isort]
 profile = "black"
+multi_line_output = 3

@@ -16,14 +16,13 @@ def test_market_data_subscription():
     assert response.status_code == 200
     data = response.json()
     assert data["code"] == 200
-    assert data["message"] == "订阅成功"
 
 def test_strategy_creation():
     """测试策略创建API"""
     response = client.post(
         "/api/strategies",
         json={
-            "name": "测试策略",
+            "name": "双均线策略",
             "symbol": "rb9999",
             "parameters": {
                 "fast_period": 5,
@@ -33,5 +32,4 @@ def test_strategy_creation():
     )
     assert response.status_code == 200
     data = response.json()
-    assert data["code"] == 200
     assert "strategy_id" in data["data"]

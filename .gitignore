@@ -4,9 +4,35 @@ __pycache__/
 *$py.class
 *.so
 .Python
-
-# 虚拟环境
+.env
 .venv/
+venv/
+ENV/
+
+# 测试
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+logs/
+
+# 数据文件
+*.csv
+*.xlsx
+*.db
 
 # 构建文件
 build/
@@ -19,47 +45,13 @@ lib64/
 wheels/
 parts/
 
-# 日志文件
-*.log
-logs/
-*.out
-*.err
-
-# IDE 配置
-.vscode/
-.idea/
-
-# 环境变量文件
-.env
-.env.*
-
-# Docker
-.docker/
-
-# 数据库
-*.sqlite3
-*.db
-
-# 系统文件
-.DS_Store
-Thumbs.db
-
 # 临时文件
 tmp/
 temp/
 
-# 数据文件
-data/
-*.csv
-*.xlsx
-
 # 密钥文件
 *.pem
 *.key
-
-# 测试覆盖率报告
-.coverage
-htmlcov/
 
 # pip 环境
 pip-wheel-metadata/

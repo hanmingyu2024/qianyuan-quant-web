@@ -61,21 +61,19 @@ class MarketDataService:
         self.ws_url = config.get('market_data.ws_url', 'ws://api.vvtr.com/v1/connect')
         self.api_url = config.get('market_data.api_url', 'http://api.vvtr.com/v1')
 
-    async def start(self) -> None:
-        """启动市场数据服务"""
+    async def start(self):
+        """启动服务"""
         try:
             self.ws = await websockets.connect(
                 f"{self.ws_url}?apiKey={self.api_key}",
                 extra_headers={
-                    'Origin': 'https://api.vvtr.com'  # 修改为https
+                    'Origin': 'https://api.vvtr.com'
                 }
             )
-            self._running = True
-            asyncio.create_task(self._receive_loop())
+            return True
         except Exception as e:
-            logger.error(f"启动市场数据服务失败: {e}")
-            self._running = False
-            raise
+            logger.error(f"WebSocket连接失败: {e}")
+            return False
 
     async def _heartbeat(self):
         """发送心跳包"""

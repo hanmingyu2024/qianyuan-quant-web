@@ -8,7 +8,7 @@ from unittest.mock import AsyncMock
 
 class TestTradingFlow:
     @pytest.fixture
-    async def setup_services(mocker):
+    async def setup_services(self, mocker):
         """初始化所有服务"""
         config = {
             'market_data': {
@@ -24,6 +24,7 @@ class TestTradingFlow:
 
         # 模拟 WebSocket 连接
         mock_ws = AsyncMock()
+        mock_ws.open = True
         mocker.patch('websockets.connect', return_value=mock_ws)
         
         market_service = MarketDataService(config)

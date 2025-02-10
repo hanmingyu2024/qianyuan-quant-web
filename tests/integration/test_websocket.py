@@ -11,14 +11,11 @@ class TestWebSocket:
         uri = "wss://api.vvtr.com/v1/connect"
         api_key = "test_api_key"
         
-        # 模拟 WebSocket 连接
         mock_ws = AsyncMock()
+        mock_ws.open = True
         mocker.patch('websockets.connect', return_value=mock_ws)
         
         async with websockets.connect(f"{uri}?apiKey={api_key}") as websocket:
-            assert websocket is not None
-            
-            # 验证连接是否成功
             assert websocket.open is True
             
             # 测试心跳

@@ -5,16 +5,21 @@ import json
 from unittest.mock import AsyncMock
 
 @pytest.fixture
-def market_service():
-    """创建市场数据服务实例"""
+async def market_service(mocker):
+    """创建市场数据服务的测试夹具"""
     config = {
         'market_data': {
             'api_key': 'test_key',
-            'ws_url': 'ws://test.com/ws',
-            'api_url': 'http://test.com/api'
+            'ws_url': 'wss://api.vvtr.com/v1/connect',
+            'api_url': 'https://api.vvtr.com/v1'
         }
     }
-    return MarketDataService(config)
+    service = MarketDataService(config)
+    # 模拟websocket连接
+    mock_ws = AsyncMock()
+    mocker.patch('websockets.connect', return_value=mock_ws)
+    await service.start()
+    return service
 
 class TestMarketDataService:
     @pytest.mark.asyncio

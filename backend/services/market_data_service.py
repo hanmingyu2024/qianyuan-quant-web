@@ -62,21 +62,22 @@ class MarketDataService:
         self.api_url = config.get('market_data.api_url', 'http://api.vvtr.com/v1')
 
     async def start(self):
-        """启动市场数据服务"""
+        """启动服务"""
         try:
-            # 建立 WebSocket 连接
-            ws_url = f"{self.ws_url}?apiKey={self.api_key}"
-            self.ws = await websockets.connect(ws_url)
+            # 初始化 WebSocket 连接
+            self.ws = await websockets.connect(
+                f"{self.ws_url}?apiKey={self.api_key}",
+                extra_headers={'Origin': 'http://api.vvtr.com'}
+            )
             
-            # 启动心跳检测
-            asyncio.create_task(self._heartbeat())
-            # 启动数据监听
-            asyncio.create_task(self._listen())
+            # 启动消息接收循环
+            asyncio.create_task(self._message_loop())
             
-            self.logger.info("市场数据服务启动成功")
+            self.logger.info("Market data service started")
+            return True
         except Exception as e:
-            self.logger.error(f"连接WebSocket失败: {str(e)}")
-            raise
+            self.logger.error(f"启动失败: {str(e)}")
+            return False
 
     async def _heartbeat(self):
         """发送心跳包"""
@@ -512,4 +513,31 @@ class MarketDataService:
     def remove_callback(self, callback):
         """移除数据回调函数"""
         if callback in self.price_callbacks:
-            self.price_callbacks.remove(callback) 
+            self.price_callbacks.remove(callback)
+
+    async def _connect(self):
+        """建立 WebSocket 连接"""
+        try:
+            if self.ws:
+                await self.ws.close()
+            
+            self.ws = await websockets.connect(
+                f"{self.ws_url}?apiKey={self.api_key}",
+                extra_headers={
+                    'Origin': 'http://api.vvtr.com'
+                }
+            )
+            
+            # 验证连接是否成功
+            response = await self.ws.recv()
+            data = json.loads(response)
+            
+            if data.get('code') != 200:
+                raise Exception(f"连接失败: {data.get('msg')}")
+            
+            self.logger.info("WebSocket connected")
+            return True
+            
+        except Exception as e:
+            self.logger.error(f"WebSocket错误: {str(e)}")
+            return False 

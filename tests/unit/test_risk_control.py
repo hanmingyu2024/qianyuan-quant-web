@@ -2,18 +2,33 @@ import pytest
 from unittest.mock import Mock, patch
 from backend.services.risk_control_service import RiskControlService
 from backend.models.database import Order
+from backend.services.market_data_service import MarketDataService
+
+@pytest.fixture
+async def market_service():
+    """创建市场数据服务"""
+    config = {
+        'market_data': {
+            'api_key': 'test_key',
+            'ws_url': 'ws://api.vvtr.com/v1/connect',
+            'api_url': 'http://api.vvtr.com/v1'
+        }
+    }
+    service = MarketDataService(config)
+    await service.start()
+    yield service
+    await service.stop()
 
 @pytest.fixture
 def risk_service(market_service):
-    """创建风控服务实例"""
+    """创建风控服务"""
     config = {
-        'risk': {
+        'risk_control': {
             'max_position': 100,
-            'max_order_amount': 1000000,
-            'max_price_deviation': 0.05
+            'max_order_value': 1000000
         }
     }
-    return RiskControlService(market_service, config)
+    return RiskControlService(config, market_service)
 
 class TestRiskControlService:
     async def test_check_position_limit(self, risk_service):

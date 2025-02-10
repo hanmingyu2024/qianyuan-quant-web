@@ -98,6 +98,10 @@ class StrategyRequest(BaseModel):
     symbol: str = Field(..., description="交易品种代码")
     parameters: dict = Field(..., description="策略参数")
 
+class MarketDataRequest(BaseModel):
+    symbols: List[str] = Query(..., description="合约代码列表，例如：['rb9999']")
+    market_type: str = Query("cn_stocks", description="市场类型：cn_stocks(股票)、cn_futures(期货)")
+
 # -----------------------------
 # API 路由定义
 # -----------------------------
@@ -236,20 +240,22 @@ async def login(request: LoginRequest):
     description="订阅指定合约的实时行情数据",
     tags=["行情接口"]
 )
-async def subscribe_market_data(request: SubscribeRequest):
+async def subscribe_market_data(
+    request: MarketDataRequest,
+    market_service: MarketDataService = Depends(get_market_service)
+):
     """订阅市场数据"""
     try:
-        await market_data_service.subscribe(request.symbols, request.market_type)
-        return {
-            "code": 200,
-            "message": "订阅成功",
-            "data": {
-                "symbols": request.symbols,
-                "market_type": request.market_type
-            }
-        }
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        result = await market_service.subscribe(
+            request.symbols,
+            request.market_type
+        )
+        return {"status": "success", "data": result}
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
 
 @router.get("/strategies",
     summary="获取策略列表",
@@ -276,19 +282,19 @@ async def list_strategies():
     description="创建新的交易策略",
     tags=["策略接口"]
 )
-async def create_strategy(request: StrategyRequest):
-    """创建新策略"""
+async def create_strategy(
+    strategy: StrategyCreate,
+    strategy_service: StrategyService = Depends(get_strategy_service)
+):
+    """创建策略"""
     try:
-        strategy = strategy_service.create_strategy(
-            user_id=get_current_user().id,
-            name=request.name,
-            symbol=request.symbol,
-            parameters=request.parameters
-        )
-        return success_response(data={'strategy_id': strategy.id}, message="策略创建成功", code=201)
+        result = await strategy_service.create_strategy(strategy)
+        return {"status": "success", "data": result}
     except Exception as e:
-        logger.exception("创建策略时发生错误")
-        return error_response(str(e), 400)
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
 
 @router.post("/trades/execute",
     summary="执行交易",

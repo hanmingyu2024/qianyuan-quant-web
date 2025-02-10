@@ -8,7 +8,7 @@ class TestWebSocket:
     @pytest.mark.asyncio
     async def test_websocket_connection(self):
         """测试WebSocket连接建立"""
-        uri = "ws://api.vvtr.com/v1/connect"
+        uri = "wss://api.vvtr.com/v1/connect"
         api_key = "test_api_key"
         
         async with websockets.connect(f"{uri}?apiKey={api_key}") as websocket:
@@ -23,7 +23,7 @@ class TestWebSocket:
     @pytest.mark.asyncio
     async def test_market_data_subscription(self):
         """测试市场数据订阅"""
-        uri = "ws://api.vvtr.com/v1/connect"
+        uri = "wss://api.vvtr.com/v1/connect"
         api_key = "test_api_key"
         
         async with websockets.connect(f"{uri}?apiKey={api_key}") as websocket:
@@ -43,7 +43,7 @@ class TestWebSocket:
     @pytest.mark.asyncio
     async def test_market_data_receiving(self):
         """测试接收市场数据"""
-        uri = "ws://api.vvtr.com/v1/connect"
+        uri = "wss://api.vvtr.com/v1/connect"
         api_key = "test_api_key"
         
         async with websockets.connect(f"{uri}?apiKey={api_key}") as websocket:
@@ -73,7 +73,7 @@ class TestWebSocket:
     @pytest.mark.asyncio
     async def test_multiple_symbols_subscription(self):
         """测试多合约订阅"""
-        uri = "ws://api.vvtr.com/v1/connect"
+        uri = "wss://api.vvtr.com/v1/connect"
         api_key = "test_api_key"
         
         async with websockets.connect(f"{uri}?apiKey={api_key}") as websocket:
@@ -105,7 +105,7 @@ class TestWebSocket:
     @pytest.mark.asyncio
     async def test_connection_error_handling(self):
         """测试连接错误处理"""
-        uri = "ws://api.vvtr.com/v1/connect"
+        uri = "wss://api.vvtr.com/v1/connect"
         api_key = "invalid_key"
         
         with pytest.raises(websockets.exceptions.WebSocketException):
@@ -115,7 +115,7 @@ class TestWebSocket:
     @pytest.mark.asyncio
     async def test_reconnection(self):
         """测试断线重连"""
-        uri = "ws://api.vvtr.com/v1/connect"
+        uri = "wss://api.vvtr.com/v1/connect"
         api_key = "test_api_key"
         
         async with websockets.connect(f"{uri}?apiKey={api_key}") as websocket:

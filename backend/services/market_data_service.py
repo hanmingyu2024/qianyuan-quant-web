@@ -62,21 +62,23 @@ class MarketDataService:
         self.api_url = config.get('market_data.api_url', 'http://api.vvtr.com/v1')
 
     async def start(self):
-        """启动服务"""
+        """启动市场数据服务"""
         try:
-            # 初始化 WebSocket 连接
+            headers = {
+                "Authorization": f"Bearer {self.config['market_data']['api_key']}",
+                "Origin": "https://api.vvtr.com"  # 修改 Origin
+            }
+            
             self.ws = await websockets.connect(
-                f"{self.ws_url}?apiKey={self.api_key}",
-                extra_headers={'Origin': 'http://api.vvtr.com'}
+                self.config['market_data']['ws_url'],
+                extra_headers=headers
             )
             
-            # 启动消息接收循环
-            asyncio.create_task(self._message_loop())
-            
-            self.logger.info("Market data service started")
+            # 启动心跳任务
+            self.heartbeat_task = asyncio.create_task(self._heartbeat())
             return True
         except Exception as e:
-            self.logger.error(f"启动失败: {str(e)}")
+            logger.error(f"启动市场数据服务失败: {e}")
             return False
 
     async def _heartbeat(self):
@@ -517,27 +519,17 @@ class MarketDataService:
 
     async def _connect(self):
         """建立 WebSocket 连接"""
-        try:
-            if self.ws:
-                await self.ws.close()
-            
-            self.ws = await websockets.connect(
-                f"{self.ws_url}?apiKey={self.api_key}",
-                extra_headers={
-                    'Origin': 'http://api.vvtr.com'
-                }
-            )
-            
-            # 验证连接是否成功
-            response = await self.ws.recv()
-            data = json.loads(response)
-            
-            if data.get('code') != 200:
-                raise Exception(f"连接失败: {data.get('msg')}")
-            
-            self.logger.info("WebSocket connected")
-            return True
-            
-        except Exception as e:
-            self.logger.error(f"WebSocket错误: {str(e)}")
-            return False 
+        retry_count = 0
+        max_retries = 3
+        
+        while retry_count < max_retries:
+            try:
+                return await websockets.connect(
+                    self.config['market_data']['ws_url'],
+                    extra_headers=self.headers
+                )
+            except Exception as e:
+                retry_count += 1
+                if retry_count == max_retries:
+                    raise
+                await asyncio.sleep(1) 

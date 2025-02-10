@@ -1,7 +1,7 @@
 from functools import lru_cache
-from pydantic_settings import BaseSettings
+from pydantic import BaseModel
 
-class Settings(BaseSettings):
+class Settings(BaseModel):
     """应用配置"""
     market_data: dict = {
         'api_key': 'test_key',

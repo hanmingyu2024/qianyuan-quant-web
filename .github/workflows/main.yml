@@ -25,7 +25,7 @@ jobs:
         
     - name: Run tests
       run: |
-        pytest backend/tests/ --cov=backend --cov-report=xml  # 生成 xml 格式的覆盖率报告
+        pytest tests/ --cov=backend --cov-report=xml  # 生成 xml 格式的覆盖率报告
         
     - name: Upload coverage reports
       uses: codecov/codecov-action@v2  # 使用最新的 codecov-action

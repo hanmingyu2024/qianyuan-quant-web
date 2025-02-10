@@ -12,6 +12,7 @@ from backend.models.database import User, Strategy, Order, MarketData
 from fastapi import APIRouter, Depends, HTTPException, Query
 from backend.services.market_data_service import MarketDataService
 from backend.config.config_manager import ConfigManager  # 导入配置管理器
+from backend.api.dependencies import get_market_service, get_strategy_service
 
 # 获取项目根目录的绝对路径并添加到 sys.path
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))

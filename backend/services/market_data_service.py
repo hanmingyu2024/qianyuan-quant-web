@@ -103,9 +103,15 @@ class MarketDataService:
         self.redis_client.close()
         self.db_session.close()
 
-    async def handle_ws_connection(self, websocket: websockets.WebSocketServerProtocol, path: str):
+    async def handle_ws_connection(self, websocket, path: str):
         """处理WebSocket连接"""
         try:
+            # 验证 API key
+            api_key = self._extract_api_key(path)
+            if not self._validate_api_key(api_key):
+                await websocket.close(1008, "Invalid API key")
+                return
+                
             # 等待订阅消息
             subscription = await websocket.recv()
             subscription_data = json.loads(subscription)
@@ -324,7 +330,7 @@ class MarketDataService:
     def get_latest_price(self, symbol: str) -> float:
         """获取最新价格"""
         if symbol in self.price_cache:
-            return self.price_cache[symbol]
+            return self.price_cache[symbol]['latest_price']
         return None
 
     async def _listen(self):

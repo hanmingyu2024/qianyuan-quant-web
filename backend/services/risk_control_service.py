@@ -23,9 +23,11 @@ class RiskMetrics:
     volatility: Decimal
 
 class RiskControlService:
-    def __init__(self, market_data_service: MarketDataService, config: Dict):
-        self.market_data_service = market_data_service
+    def __init__(self, config):
         self.config = config
+        self.max_position = config['risk_control']['max_position']
+        self.max_order_value = config['risk_control']['max_order_value']
+        self.market_data_service = MarketDataService(config)
         self.risk_limits = {}
         self.db = SessionLocal()
         self.logger = logging.getLogger(__name__)

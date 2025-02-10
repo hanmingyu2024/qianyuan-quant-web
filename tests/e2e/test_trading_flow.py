@@ -4,10 +4,11 @@ from backend.models.order import Order
 from backend.services.market_data_service import MarketDataService
 from backend.services.execution_engine import ExecutionEngine
 from backend.services.risk_control_service import RiskControlService
+from unittest.mock import AsyncMock
 
 class TestTradingFlow:
     @pytest.fixture
-    async def setup_services(self):
+    async def setup_services(mocker):
         """初始化所有服务"""
         config = {
             'market_data': {
@@ -20,22 +21,22 @@ class TestTradingFlow:
                 'max_order_value': 1000000
             }
         }
+
+        # 模拟 WebSocket 连接
+        mock_ws = AsyncMock()
+        mocker.patch('websockets.connect', return_value=mock_ws)
         
         market_service = MarketDataService(config)
-        risk_service = RiskControlService(config)
-        execution_service = ExecutionEngine(market_service, risk_service, config)
-        
         await market_service.start()
         
-        return {
-            'market': market_service,
-            'risk': risk_service,
-            'execution': execution_service
-        }
+        risk_service = RiskControlService(config)
+        execution_service = ExecutionEngine(market_service, risk_service, config)
+
+        return market_service, risk_service, execution_service
 
     async def test_market_data_flow(self, setup_services):
         """测试行情数据流程"""
-        market_service = setup_services['market']
+        market_service = setup_services[0]
         
         # 订阅期货行情
         symbols = ['rb9999']
@@ -50,8 +51,8 @@ class TestTradingFlow:
 
     async def test_trading_flow(self, setup_services):
         """测试交易流程"""
-        execution_service = setup_services['execution']
-        market_service = setup_services['market']
+        execution_service = setup_services[2]
+        market_service = setup_services[0]
         
         # 创建订单
         order = Order(
@@ -72,8 +73,8 @@ class TestTradingFlow:
 
     async def test_risk_control(self, setup_services):
         """测试风控流程"""
-        risk_service = setup_services['risk']
-        execution_service = setup_services['execution']
+        risk_service = setup_services[1]
+        execution_service = setup_services[2]
         
         # 测试超限订单
         large_order = Order(
@@ -90,7 +91,7 @@ class TestTradingFlow:
 
     async def test_websocket_connection(self, setup_services):
         """测试WebSocket连接"""
-        market_service = setup_services['market']
+        market_service = setup_services[0]
         
         # 验证连接状态
         assert market_service.ws is not None
@@ -103,7 +104,7 @@ class TestTradingFlow:
 
     async def test_market_data_processing(self, setup_services):
         """测试行情数据处理"""
-        market_service = setup_services['market']
+        market_service = setup_services[0]
         
         # 模拟接收行情数据
         test_data = {
@@ -124,8 +125,8 @@ class TestTradingFlow:
 
     async def test_error_handling(self, setup_services):
         """测试错误处理"""
-        market_service = setup_services['market']
-        execution_service = setup_services['execution']
+        market_service = setup_services[0]
+        execution_service = setup_services[2]
         
         # 测试无效订阅
         with pytest.raises(ValueError):

@@ -3,21 +3,26 @@ from unittest.mock import Mock, patch
 from backend.services.risk_control_service import RiskControlService
 from backend.models.database import Order
 from backend.services.market_data_service import MarketDataService
+from unittest.mock import AsyncMock
 
 @pytest.fixture
-async def market_service():
+async def market_service(mocker):
     """创建市场数据服务"""
     config = {
         'market_data': {
             'api_key': 'test_key',
-            'ws_url': 'ws://api.vvtr.com/v1/connect',
-            'api_url': 'http://api.vvtr.com/v1'
+            'ws_url': 'wss://api.vvtr.com/v1/connect',
+            'api_url': 'https://api.vvtr.com/v1'
         }
     }
+    
+    # 模拟 WebSocket 连接
+    mock_ws = AsyncMock()
+    mocker.patch('websockets.connect', return_value=mock_ws)
+    
     service = MarketDataService(config)
     await service.start()
-    yield service
-    await service.stop()
+    return service
 
 @pytest.fixture
 def risk_service(market_service):

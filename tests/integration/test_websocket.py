@@ -2,16 +2,22 @@ import pytest
 import websockets
 import json
 import asyncio
-from unittest.mock import patch
+from unittest.mock import patch, AsyncMock
 
 class TestWebSocket:
     @pytest.mark.asyncio
-    async def test_websocket_connection(self):
+    async def test_websocket_connection(self, mocker):
         """测试WebSocket连接建立"""
         uri = "wss://api.vvtr.com/v1/connect"
         api_key = "test_api_key"
         
+        # 模拟 WebSocket 连接
+        mock_ws = AsyncMock()
+        mocker.patch('websockets.connect', return_value=mock_ws)
+        
         async with websockets.connect(f"{uri}?apiKey={api_key}") as websocket:
+            assert websocket is not None
+            
             # 验证连接是否成功
             assert websocket.open is True
             

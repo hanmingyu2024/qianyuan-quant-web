@@ -1,6 +1,8 @@
 import pytest
 from unittest.mock import Mock, patch
 from backend.services.market_data_service import MarketDataService
+import json
+from unittest.mock import AsyncMock
 
 @pytest.fixture
 def market_service():
@@ -15,17 +17,18 @@ def market_service():
     return MarketDataService(config)
 
 class TestMarketDataService:
+    @pytest.mark.asyncio
     async def test_subscribe_success(self, market_service):
         """测试成功订阅市场数据"""
-        symbols = ['rb9999']
-        market_type = 'cn_futures'
-        
         with patch('websockets.connect') as mock_connect:
-            mock_ws = Mock()
-            mock_ws.recv.return_value = '{"code": 200, "msg": "success"}'
-            mock_connect.return_value.__aenter__.return_value = mock_ws
+            mock_ws = AsyncMock()
+            mock_ws.recv.return_value = json.dumps({
+                'code': 0,
+                'msg': 'success'
+            })
+            mock_connect.return_value = mock_ws
             
-            result = await market_service.subscribe(symbols, market_type)
+            result = await market_service.subscribe(['rb9999'], 'cn_futures')
             assert result is True
 
     async def test_subscribe_limit(self, market_service):

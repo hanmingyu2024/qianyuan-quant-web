@@ -12,8 +12,8 @@ class TestTradingFlow:
         config = {
             'market_data': {
                 'api_key': 'test_key',
-                'ws_url': 'ws://api.vvtr.com/v1/connect',
-                'api_url': 'http://api.vvtr.com/v1'
+                'ws_url': 'wss://api.vvtr.com/v1/connect',
+                'api_url': 'https://api.vvtr.com/v1'
             },
             'risk_control': {
                 'max_position': 100,

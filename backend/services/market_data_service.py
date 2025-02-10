@@ -64,14 +64,12 @@ class MarketDataService:
     async def start(self):
         """启动市场数据服务"""
         try:
-            headers = {
-                "Authorization": f"Bearer {self.config['market_data']['api_key']}",
-                "Origin": "https://api.vvtr.com"  # 修改 Origin
-            }
-            
             self.ws = await websockets.connect(
                 self.config['market_data']['ws_url'],
-                extra_headers=headers
+                extra_headers={
+                    'Authorization': f"Bearer {self.config['market_data']['api_key']}",
+                    'Origin': 'https://api.vvtr.com'
+                }
             )
             
             # 启动心跳任务

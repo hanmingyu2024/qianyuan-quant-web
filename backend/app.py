@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.api import api_blueprint
+from backend.models.requests import SubscribeRequest
 
 # 添加中文标题和描述
 app = FastAPI(
@@ -65,6 +66,10 @@ async def subscribe_market_data(request: SubscribeRequest):
             "code": 500,
             "message": str(e)
         }
+
+@app.get("/")
+async def read_root():
+    return {"message": "Hello, World!"}
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from backend.app import app
+from backend.models.requests import SubscribeRequest
 
 client = TestClient(app)
 
@@ -16,6 +17,7 @@ def test_market_data_subscription():
     assert response.status_code == 200
     data = response.json()
     assert data["code"] == 200
+    assert "subscribed" in data["data"]
 
 def test_strategy_creation():
     """测试策略创建API"""

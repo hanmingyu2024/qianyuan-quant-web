@@ -70,9 +70,10 @@ class MarketDataService:
                     'Origin': 'https://api.vvtr.com'
                 }
             )
+            self.running = True
             return True
         except Exception as e:
-            logger.error(f"WebSocket连接失败: {e}")
+            self.logger.error(f"WebSocket连接失败: {e}")
             return False
 
     async def _heartbeat(self):
@@ -89,6 +90,8 @@ class MarketDataService:
 
     async def stop(self):
         """停止服务"""
+        if self.ws:
+            await self.ws.close()
         self.running = False
         
         # 关闭所有WebSocket连接

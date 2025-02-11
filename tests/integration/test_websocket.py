@@ -24,10 +24,18 @@ class TestWebSocket:
             assert response == "pong"
 
     @pytest.mark.asyncio
-    async def test_market_data_subscription(self):
+    async def test_market_data_subscription(self, mocker):
         """测试市场数据订阅"""
         uri = "wss://api.vvtr.com/v1/connect"
         api_key = "test_api_key"
+        
+        mock_ws = AsyncMock()
+        mock_ws.open = True
+        mock_ws.recv.return_value = json.dumps({
+            "code": 200,
+            "message": "订阅成功"
+        })
+        mocker.patch('websockets.connect', return_value=mock_ws)
         
         async with websockets.connect(f"{uri}?apiKey={api_key}") as websocket:
             # 发送订阅请求

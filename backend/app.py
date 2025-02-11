@@ -47,6 +47,25 @@ app.include_router(
 async def read_root():
     return {"message": "欢迎使用乾元量化交易系统"}
 
+@app.post("/api/market/subscribe")
+async def subscribe_market_data(request: SubscribeRequest):
+    """订阅市场数据"""
+    try:
+        result = await market_service.subscribe(
+            symbols=request.symbols,
+            market_type=request.market_type
+        )
+        return {
+            "code": 200,
+            "data": {"subscribed": result},
+            "message": "订阅成功"
+        }
+    except Exception as e:
+        return {
+            "code": 500,
+            "message": str(e)
+        }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("backend.app:app", host="127.0.0.1", port=8000, reload=True)

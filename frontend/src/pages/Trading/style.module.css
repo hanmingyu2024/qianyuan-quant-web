@@ -1,0 +1,32 @@
+.container {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 24px;
+}
+
+.tradingCard {
+  height: fit-content;
+}
+
+.orderForm {
+  max-width: 100%;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.buyButton {
+  background-color: #52c41a;
+}
+
+.sellButton {
+  background-color: #ff4d4f;
+}
+
+.ordersCard {
+  min-height: 400px;
+} 

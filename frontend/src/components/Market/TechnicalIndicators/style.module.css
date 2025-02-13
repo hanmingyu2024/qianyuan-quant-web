@@ -1,0 +1,13 @@
+.card {
+  margin-bottom: 24px;
+}
+
+.chart {
+  height: 400px;
+}
+
+.settings {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 8px;
+} 

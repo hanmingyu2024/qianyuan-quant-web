@@ -1,0 +1,7 @@
+.preview {
+  margin-top: 16px;
+}
+
+.preview :global(.ant-slider) {
+  margin: 10px 0;
+} 

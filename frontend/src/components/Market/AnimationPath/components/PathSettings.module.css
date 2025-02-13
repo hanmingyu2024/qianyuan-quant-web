@@ -1,0 +1,40 @@
+.settingsContainer {
+  width: 300px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+.settingsContainer :global(.ant-form-item) {
+  margin-bottom: 12px;
+}
+
+.settingsContainer :global(.ant-card) {
+  margin-bottom: 16px;
+}
+
+.settingsContainer :global(.ant-card-head) {
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+.settingsContainer :global(.ant-card-head-title) {
+  padding: 8px 0;
+}
+
+.settingsContainer :global(.ant-card-body) {
+  padding: 12px;
+}
+
+.settingsContainer :global(.ant-divider) {
+  margin: 12px 0;
+}
+
+.settingsContainer :global(.ant-input[type="color"]) {
+  width: 60px;
+  padding: 2px;
+  height: 32px;
+} 

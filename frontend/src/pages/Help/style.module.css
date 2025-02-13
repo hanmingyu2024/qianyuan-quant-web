@@ -1,0 +1,33 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.searchCard {
+  text-align: center;
+}
+
+.searchInput {
+  max-width: 500px;
+  margin: 24px auto;
+}
+
+.categories {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.categoryTag {
+  cursor: pointer;
+}
+
+.faqCard {
+  background-color: #fff;
+}
+
+.contactCard {
+  background-color: #fff;
+} 

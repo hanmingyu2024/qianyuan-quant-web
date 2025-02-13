@@ -1,0 +1,14 @@
+.card {
+  margin-bottom: 24px;
+}
+
+.conditions {
+  width: 100%;
+  margin: 16px 0;
+}
+
+.condition {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+} 

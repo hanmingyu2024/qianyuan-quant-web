@@ -1,0 +1,17 @@
+.analytics {
+  margin-top: 16px;
+}
+
+.analytics :global(.ant-card-small) {
+  margin-top: 16px;
+}
+
+.analytics :global(.ant-progress) {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.analytics :global(.ant-list-header) {
+  font-weight: bold;
+} 

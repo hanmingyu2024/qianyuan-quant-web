@@ -1,0 +1,36 @@
+.comments {
+  margin-top: 16px;
+}
+
+.commentForm {
+  margin-bottom: 24px;
+}
+
+.commentList {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.commentList :global(.ant-comment) {
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.commentList :global(.ant-comment:hover) {
+  background-color: #f5f5f5;
+}
+
+.commentList :global(.ant-comment-nested) {
+  margin-left: 24px;
+  border-left: 2px solid #f0f0f0;
+  padding-left: 16px;
+}
+
+.commentList :global(.ant-comment-actions) {
+  margin-top: 8px;
+}
+
+.commentList :global(.ant-comment-content-detail) {
+  margin-bottom: 8px;
+} 

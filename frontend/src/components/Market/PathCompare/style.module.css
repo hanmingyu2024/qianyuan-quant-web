@@ -1,0 +1,18 @@
+.compare {
+  margin-top: 16px;
+}
+
+.diffList {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.diffItem {
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.diffItem:hover {
+  background-color: #f5f5f5;
+} 

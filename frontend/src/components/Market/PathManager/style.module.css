@@ -1,0 +1,13 @@
+.manager {
+  margin-top: 16px;
+}
+
+.pathItem {
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.pathItem:hover {
+  background-color: #f5f5f5;
+} 

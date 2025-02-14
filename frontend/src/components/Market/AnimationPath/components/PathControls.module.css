@@ -1,0 +1,34 @@
+.controlsContainer {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  gap: 16px;
+}
+
+.sliderContainer {
+  flex: 1;
+  margin: 0 16px;
+}
+
+.timeDisplay {
+  font-family: monospace;
+  font-size: 14px;
+  color: #666;
+  min-width: 48px;
+  text-align: right;
+}
+
+:global(.ant-slider-handle) {
+  border-color: #1890ff;
+}
+
+:global(.ant-slider-track) {
+  background-color: #1890ff;
+}
+
+:global(.ant-slider:hover .ant-slider-track) {
+  background-color: #40a9ff;
+} 

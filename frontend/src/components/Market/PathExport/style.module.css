@@ -1,0 +1,12 @@
+.export {
+  margin-top: 16px;
+}
+
+.export :global(.ant-tabs-content) {
+  margin-top: 16px;
+}
+
+.export :global(.ant-input) {
+  font-family: monospace;
+  font-size: 14px;
+} 

@@ -1,0 +1,16 @@
+# config/base.yml
+
+database:
+  host: localhost
+  port: 5432  # PostgreSQL 默认端口
+  username: quant_user
+  password: your_secure_password
+  database: quant_db
+
+redis:
+  host: localhost
+  port: 6379
+  password: null
+
+market_data:
+  websocket_url: wss://api.example.com/ws

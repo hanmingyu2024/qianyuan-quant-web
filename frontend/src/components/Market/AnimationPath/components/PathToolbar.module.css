@@ -1,0 +1,22 @@
+.toolbar {
+  padding: 8px 16px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar :global(.ant-divider) {
+  margin: 0 8px;
+}
+
+.toolbar :global(.ant-btn) {
+  padding: 4px 8px;
+  height: 32px;
+}
+
+.toolbar :global(.ant-space) {
+  flex-wrap: wrap;
+}

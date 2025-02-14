@@ -1,0 +1,23 @@
+.card {
+  margin-top: 16px;
+}
+
+.layerItem {
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.layerItem:hover {
+  background-color: #f5f5f5;
+}
+
+.layerItem.selected {
+  background-color: #e6f7ff;
+}
+
+.layerInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+} 

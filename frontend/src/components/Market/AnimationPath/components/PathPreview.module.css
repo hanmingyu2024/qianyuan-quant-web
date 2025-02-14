@@ -1,0 +1,12 @@
+.previewContainer {
+  position: relative;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.previewCanvas {
+  display: block;
+  touch-action: none;
+} 

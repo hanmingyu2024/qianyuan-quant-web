@@ -1,0 +1,36 @@
+.version {
+  margin-top: 16px;
+}
+
+.versionItem {
+  padding: 8px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.versionItem:hover {
+  background-color: #f5f5f5;
+}
+
+.versionName {
+  font-weight: bold;
+}
+
+.versionTime {
+  color: #999;
+  font-size: 12px;
+}
+
+.versionDesc {
+  color: #666;
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.version :global(.ant-timeline) {
+  margin-top: 16px;
+}
+
+.version :global(.ant-timeline-item-content) {
+  margin-left: 24px;
+} 

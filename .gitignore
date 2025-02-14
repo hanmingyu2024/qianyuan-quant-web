@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.venv/
+venv/
+ENV/
+
+# 测试
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 日志
+*.log
+logs/
+
+# 数据文件
+*.csv
+*.xlsx
+*.db
+
+# 构建文件
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+lib/
+lib64/
+wheels/
+parts/
+
+# 临时文件
+tmp/
+temp/
+
+# 密钥文件
+*.pem
+*.key
+
+# pip 环境
+pip-wheel-metadata/
+node_modules

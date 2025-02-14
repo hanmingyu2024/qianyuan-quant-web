@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: 
+      context: ../../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/quant
+    depends_on:
+      - db
+      - redis
+
+  market_data_service:
+    build:
+      context: ../../microservices/market_data_service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=quant
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data: 

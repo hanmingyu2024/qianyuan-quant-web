@@ -1,0 +1,29 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+rule_files:
+  - "alert_rules.yml"
+
+scrape_configs:
+  - job_name: 'backend'
+    static_configs:
+      - targets: ['backend:5000']
+
+  - job_name: 'market_data_service'
+    static_configs:
+      - targets: ['market_data_service:8000']
+
+  - job_name: 'risk_management'
+    static_configs:
+      - targets: ['risk_management:8000']
+
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['node_exporter:9100']

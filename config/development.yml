@@ -1,0 +1,15 @@
+# config/development.yml
+
+database:
+  host: localhost
+  port: 5432
+  database: quant_db
+  pool_size: 20
+  max_overflow: 0
+
+redis:
+  host: localhost
+  port: 6379
+
+market_data:
+  websocket_url: wss://api.example.com/ws

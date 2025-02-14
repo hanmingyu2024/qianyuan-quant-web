@@ -1,0 +1,20 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.chart {
+  flex-grow: 1;
+  margin-bottom: 24px;
+  min-height: 400px;
+}
+
+.table {
+  flex: 1;
+} 

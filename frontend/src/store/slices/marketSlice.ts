@@ -1,72 +1,35 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface MarketState {
-  realTimeData: {
-    [symbol: string]: {
-      price: number;
-      change: number;
-      changePercent: number;
-      volume: number;
-      turnover: number;
-      timestamp: number;
-    };
+  currentSymbol: string;
+  klineData: any[];
+  depth: {
+    asks: [number, number][];
+    bids: [number, number][];
   };
-  klineData: {
-    [symbol: string]: Array<{
-      time: string;
-      open: number;
-      high: number;
-      low: number;
-      close: number;
-      volume: number;
-    }>;
-  };
-  selectedSymbol: string;
-  loading: boolean;
-  error: string | null;
 }
 
 const initialState: MarketState = {
-  realTimeData: {},
-  klineData: {},
-  selectedSymbol: '',
-  loading: false,
-  error: null,
+  currentSymbol: 'BTC/USDT',
+  klineData: [],
+  depth: {
+    asks: [],
+    bids: []
+  }
 };
 
-const marketSlice = createSlice({
+export const marketSlice = createSlice({
   name: 'market',
   initialState,
   reducers: {
-    updateRealTimeData: (state, action: PayloadAction<{ symbol: string; data: any }>) => {
-      const { symbol, data } = action.payload;
-      state.realTimeData[symbol] = {
-        ...data,
-        timestamp: Date.now(),
-      };
+    setCurrentSymbol: (state, action: PayloadAction<string>) => {
+      state.currentSymbol = action.payload;
     },
-    updateKlineData: (state, action: PayloadAction<{ symbol: string; data: any[] }>) => {
-      const { symbol, data } = action.payload;
-      state.klineData[symbol] = data;
+    updateKlineData: (state, action: PayloadAction<any[]>) => {
+      state.klineData = action.payload;
     },
-    setSelectedSymbol: (state, action: PayloadAction<string>) => {
-      state.selectedSymbol = action.payload;
-    },
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
-    },
-    setError: (state, action: PayloadAction<string | null>) => {
-      state.error = action.payload;
-    },
-  },
-});
-
-export const {
-  updateRealTimeData,
-  updateKlineData,
-  setSelectedSymbol,
-  setLoading,
-  setError,
-} = marketSlice.actions;
-
-export default marketSlice.reducer; 
+    updateDepth: (state, action: PayloadAction<any>) => {
+      state.depth = action.payload;
+    }
+  }
+}); 

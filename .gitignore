@@ -56,3 +56,6 @@ temp/
 # pip 环境
 pip-wheel-metadata/
 node_modules
+
+# Environment variables
+*.env

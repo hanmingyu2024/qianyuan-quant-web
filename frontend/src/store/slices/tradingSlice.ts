@@ -1,80 +1,68 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-export interface Order {
-  id: string;
-  symbol: string;
-  type: 'buy' | 'sell';
-  price: number;
-  quantity: number;
-  status: 'pending' | 'filled' | 'cancelled' | 'failed';
-  createTime: number;
-  updateTime: number;
-}
-
-export interface Position {
-  symbol: string;
-  quantity: number;
-  averagePrice: number;
-  currentPrice: number;
-  profit: number;
-  profitPercent: number;
-}
-
 interface TradingState {
-  orders: Order[];
-  positions: Position[];
-  balance: number;
-  loading: boolean;
-  error: string | null;
+  positions: {
+    symbol: string;
+    direction: 'long' | 'short';
+    amount: number;
+    avgPrice: number;
+    currentPrice: number;
+    pnl: number;
+    pnlPercent: number;
+  }[];
+  orders: {
+    id: string;
+    symbol: string;
+    type: 'limit' | 'market';
+    direction: 'buy' | 'sell';
+    price: number;
+    amount: number;
+    filled: number;
+    status: 'pending' | 'partial' | 'completed' | 'canceled';
+    time: string;
+  }[];
+  assets: {
+    totalValue: number;
+    availableValue: number;
+    frozenValue: number;
+    pnl: number;
+    list: {
+      currency: string;
+      available: number;
+      frozen: number;
+      total: number;
+    }[];
+  };
 }
 
 const initialState: TradingState = {
-  orders: [],
   positions: [],
-  balance: 0,
-  loading: false,
-  error: null,
+  orders: [],
+  assets: {
+    totalValue: 0,
+    availableValue: 0,
+    frozenValue: 0,
+    pnl: 0,
+    list: [],
+  },
 };
 
-const tradingSlice = createSlice({
+export const tradingSlice = createSlice({
   name: 'trading',
   initialState,
   reducers: {
-    addOrder: (state, action: PayloadAction<Order>) => {
-      state.orders.unshift(action.payload);
-    },
-    updateOrder: (state, action: PayloadAction<Partial<Order> & { id: string }>) => {
-      const index = state.orders.findIndex(order => order.id === action.payload.id);
-      if (index !== -1) {
-        state.orders[index] = {
-          ...state.orders[index],
-          ...action.payload,
-          updateTime: Date.now(),
-        };
-      }
-    },
-    updatePositions: (state, action: PayloadAction<Position[]>) => {
+    updatePositions: (state, action: PayloadAction<typeof state.positions>) => {
       state.positions = action.payload;
     },
-    updateBalance: (state, action: PayloadAction<number>) => {
-      state.balance = action.payload;
+    updateOrders: (state, action: PayloadAction<typeof state.orders>) => {
+      state.orders = action.payload;
     },
-    setLoading: (state, action: PayloadAction<boolean>) => {
-      state.loading = action.payload;
-    },
-    setError: (state, action: PayloadAction<string | null>) => {
-      state.error = action.payload;
+    updateAssets: (state, action: PayloadAction<typeof state.assets>) => {
+      state.assets = action.payload;
     },
   },
 });
 
-export const {
-  addOrder,
-  updateOrder,
-  updatePositions,
-  updateBalance,
-  setLoading,
-  setError,
-} = tradingSlice.actions;
+export const { updatePositions, updateOrders, updateAssets } = tradingSlice.actions;
 
 export default tradingSlice.reducer; 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, Form, Input, Button, message, Row, Col } from 'antd';
 import { UserOutlined, LockOutlined, MobileOutlined, MailOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { userApi } from '../../services/api';
+import { userApi } from '@/services';
 
 const Register: React.FC = () => {
   const [form] = Form.useForm();

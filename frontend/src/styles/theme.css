@@ -1,0 +1,33 @@
+body.dark {
+  background-color: #141414;
+}
+
+body.dark .ant-layout {
+  background-color: #141414;
+}
+
+body.dark .ant-layout-header {
+  background-color: #1f1f1f;
+}
+
+body.dark .ant-layout-sider {
+  background-color: #1f1f1f;
+}
+
+body.dark .ant-card {
+  background-color: #1f1f1f;
+}
+
+body.dark .ant-table {
+  background-color: #1f1f1f;
+}
+
+body.dark .ant-input {
+  background-color: #1f1f1f;
+}
+
+body.dark .ant-select-selector {
+  background-color: #1f1f1f !important;
+}
+
+/* 添加更多暗色主题样式 */ 

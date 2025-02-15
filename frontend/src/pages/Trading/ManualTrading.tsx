@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Table, Form, Input, InputNumber, Select, Button, Space, Tag, Statistic } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined, ReloadOutlined } from '@ant-design/icons';
 import { wsService } from '../../services/websocket';
-import { tradingApi, marketApi } from '../../services/api';
+import { tradingApi, marketApi } from '@/services';
 import { API_ENDPOINTS } from '../../services/config';
 
 const { Option } = Select;

@@ -1,49 +1,66 @@
-import React from 'react';
-import { Form, Input, Button, Select, InputNumber } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
+import * as React from 'react';
+import { Form, InputNumber, Select, Button, Space } from 'antd';
 import styled from 'styled-components';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/store';
 
-const OrderFormWrapper = styled.div`
-  padding: 20px;
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+const { Option } = Select;
+
+const FormContainer = styled.div`
+  .ant-form-item-label {
+    padding-bottom: 4px;
+  }
 `;
 
-interface OrderFormProps {
-  type: 'limit' | 'market';
-}
-
-export const OrderForm: React.FC<OrderFormProps> = ({ type }) => {
+const OrderForm: React.FC = () => {
   const [form] = Form.useForm();
-  const dispatch = useDispatch();
-  const currentPrice = useSelector((state: any) => state.market.currentPrice);
+  const currentPrice = useSelector((state: RootState) => state.market.currentPrice);
 
-  const onFinish = (values: any) => {
-    // 处理下单逻辑
+  const handleSubmit = (values: any) => {
     console.log('Order values:', values);
   };
 
   return (
-    <OrderFormWrapper>
-      <Form form={form} onFinish={onFinish} layout="vertical">
-        <Form.Item label="价格" name="price">
-          <InputNumber 
+    <FormContainer>
+      <Form form={form} layout="vertical" onFinish={handleSubmit}>
+        <Form.Item name="type" label="交易类型" rules={[{ required: true }]}>
+          <Select>
+            <Option value="limit">限价委托</Option>
+            <Option value="market">市价委托</Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item name="direction" label="方向" rules={[{ required: true }]}>
+          <Select>
+            <Option value="buy">买入</Option>
+            <Option value="sell">卖出</Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item name="price" label="价格" rules={[{ required: true }]}>
+          <InputNumber
             style={{ width: '100%' }}
             precision={2}
             min={0}
-            disabled={type === 'market'}
+            placeholder={`当前价格: ${currentPrice}`}
           />
         </Form.Item>
-        <Form.Item label="数量" name="amount">
+
+        <Form.Item name="amount" label="数量" rules={[{ required: true }]}>
           <InputNumber style={{ width: '100%' }} min={0} />
         </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit" block>
-            {type === 'limit' ? '限价委托' : '市价委托'}
+
+        <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+          <Button type="primary" htmlType="submit" style={{ width: '48%' }}>
+            买入
           </Button>
-        </Form.Item>
+          <Button danger htmlType="submit" style={{ width: '48%' }}>
+            卖出
+          </Button>
+        </Space>
       </Form>
-    </OrderFormWrapper>
+    </FormContainer>
   );
-}; 
+};
+
+export default OrderForm; 

@@ -3,7 +3,7 @@ import { Table, Card, Button, Space, Modal, Tag, message } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, PlayCircleOutlined, PauseCircleOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { Strategy } from '../../store/slices/strategySlice';
-import { strategyApi } from '../../services/api';
+import { strategyApi } from '@/services';
 import StrategyEditor from './StrategyEditor';
 import { RootState } from '../../store';
 

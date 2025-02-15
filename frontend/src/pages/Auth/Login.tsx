@@ -1,19 +1,19 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 import { Card, Form, Input, Button, Tabs, message, Row, Col, Divider } from 'antd';
 import { UserOutlined, LockOutlined, MobileOutlined, MailOutlined, WechatOutlined, QqOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setUser, setToken } from '../../store/slices/userSlice';
-import { userApi } from '../../services/api';
+import { userApi } from '@/services';
 
 const { TabPane } = Tabs;
 
 const Login: React.FC = () => {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('account');
-  const [sendingCode, setSendingCode] = useState(false);
-  const [countdown, setCountdown] = useState(0);
+  const [loading, setLoading] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState('account');
+  const [sendingCode, setSendingCode] = React.useState(false);
+  const [countdown, setCountdown] = React.useState(0);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 

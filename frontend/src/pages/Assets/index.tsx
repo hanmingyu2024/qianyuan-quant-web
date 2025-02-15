@@ -1,10 +1,18 @@
 import React from 'react'
-import { Card, Table, Statistic, Row, Col, Button, Space, Tabs } from 'antd'
-import type { ColumnsType } from 'antd/es/table'
+import { Layout, Card, Table, Statistic, Row, Col, Button, Space, Tabs } from 'antd'
+import styled from 'styled-components'
+import { useSelector } from 'react-redux'
+import type { RootState } from '@/store'
 import { useUserStore } from '@/store/useUserStore'
 import { useMarketStore } from '@/store/useMarketStore'
 import TransferModal from '@/components/Assets/TransferModal'
 import styles from './style.module.css'
+
+const { Content } = Layout
+
+const StyledContent = styled(Content)`
+  padding: 16px;
+`
 
 interface AssetData {
   currency: string
@@ -28,6 +36,7 @@ const Assets: React.FC = () => {
   const { userInfo } = useUserStore()
   const { marketData } = useMarketStore()
   const [transferType, setTransferType] = React.useState<'deposit' | 'withdraw' | null>(null)
+  const assets = useSelector((state: RootState) => state.trading.assets)
 
   const calculateAssets = (): AssetData[] => {
     if (!userInfo) return []
@@ -125,37 +134,38 @@ const Assets: React.FC = () => {
     },
   ]
 
-  const assets = calculateAssets()
-  const totalValue = assets.reduce((sum, asset) => sum + asset.valueInUSDT, 0)
+  const totalValue = assets?.totalValue || 0
+  const availableValue = assets?.availableValue || 0
+  const frozenValue = assets?.frozenValue || 0
+  const pnl = assets?.pnl || 0
 
   return (
-    <div className={styles.container}>
-      <Card className={styles.overview}>
-        <Row gutter={24}>
-          <Col span={8}>
-            <Statistic
-              title="总资产估值 (USDT)"
-              value={totalValue}
-              precision={2}
-            />
-          </Col>
-          <Col span={8}>
-            <Statistic
-              title="24h收益 (USDT)"
-              value={0}
-              precision={2}
-              valueStyle={{ color: '#3f8600' }}
-            />
-          </Col>
-          <Col span={8}>
-            <Statistic
-              title="冻结资产 (USDT)"
-              value={0}
-              precision={2}
-            />
-          </Col>
-        </Row>
-      </Card>
+    <StyledContent>
+      <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Card>
+            <Row gutter={16}>
+              <Col span={6}>
+                <Statistic title="总资产估值 (USDT)" value={totalValue} />
+              </Col>
+              <Col span={6}>
+                <Statistic title="可用资产 (USDT)" value={availableValue} />
+              </Col>
+              <Col span={6}>
+                <Statistic title="冻结资产 (USDT)" value={frozenValue} />
+              </Col>
+              <Col span={6}>
+                <Statistic title="持仓盈亏 (USDT)" value={pnl} />
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+        <Col span={24}>
+          <Card title="资产明细">
+            <Table columns={columns} dataSource={assets?.list || []} />
+          </Card>
+        </Col>
+      </Row>
 
       <Card
         title="资产列表"
@@ -179,7 +189,7 @@ const Assets: React.FC = () => {
               children: (
                 <Table
                   columns={columns}
-                  dataSource={assets}
+                  dataSource={calculateAssets()}
                   rowKey="currency"
                   pagination={false}
                 />
@@ -205,7 +215,7 @@ const Assets: React.FC = () => {
         type={transferType || 'deposit'}
         onClose={() => setTransferType(null)}
       />
-    </div>
+    </StyledContent>
   )
 }
 

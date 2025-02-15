@@ -1,6 +1,33 @@
 import { message } from 'antd'
-import { AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios'
 import { useUserStore } from '@/store/useUserStore'
+
+interface ApiError {
+  detail: string
+  code?: string
+}
+
+export function handleError(error: unknown): void {
+  if (axios.isAxiosError(error)) {
+    const axiosError = error as AxiosError<ApiError>
+    const errorMessage = axiosError.response?.data?.detail || axiosError.message
+    message.error(errorMessage)
+  } else if (error instanceof Error) {
+    message.error(error.message)
+  } else {
+    message.error('An unexpected error occurred')
+  }
+}
+
+export function createErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const axiosError = error as AxiosError<ApiError>
+    return axiosError.response?.data?.detail || axiosError.message
+  } else if (error instanceof Error) {
+    return error.message
+  }
+  return 'An unexpected error occurred'
+}
 
 interface ErrorResponse {
   code: string

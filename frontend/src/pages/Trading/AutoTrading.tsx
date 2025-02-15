@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Row, Col, Table, Button, Space, Tag, Statistic, Progress, Alert, Switch } from 'antd';
 import { PlayCircleOutlined, PauseCircleOutlined, SettingOutlined, LineChartOutlined } from '@ant-design/icons';
-import { Line } from '@ant-design/plots';
+import * as echarts from 'echarts';
 import { wsService } from '../../services/websocket';
-import api from '../../services/api';
+import { api } from '@/services';
 import { API_ENDPOINTS } from '../../services/config';
 
 // 模拟数据
@@ -62,6 +62,7 @@ const AutoTrading: React.FC = () => {
     status: 'normal',
     message: '所有自动交易策略运行正常，无异常告警',
   });
+  const chartRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // 初始化数据
@@ -76,6 +77,65 @@ const AutoTrading: React.FC = () => {
       wsService.unsubscribe('system', handleSystemUpdate);
     };
   }, []);
+
+  useEffect(() => {
+    if (chartRef.current) {
+      const chart = echarts.init(chartRef.current);
+      
+      const option = {
+        tooltip: {
+          trigger: 'axis',
+          formatter: (params: any) => {
+            const data = params[0];
+            return `${data.name}<br/>收益: ¥${data.value.toFixed(2)}`;
+          }
+        },
+        xAxis: {
+          type: 'category',
+          data: profitData.map(item => item.date),
+          boundaryGap: false,
+        },
+        yAxis: {
+          type: 'value',
+          axisLabel: {
+            formatter: (value: number) => `¥${value}`
+          }
+        },
+        series: [{
+          name: '收益',
+          type: 'line',
+          data: profitData.map(item => item.value),
+          smooth: true,
+          lineStyle: {
+            width: 2,
+            color: '#1890ff'
+          },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              {
+                offset: 0,
+                color: 'rgba(24,144,255,0.3)'
+              },
+              {
+                offset: 1,
+                color: 'rgba(24,144,255,0.1)'
+              }
+            ])
+          }
+        }]
+      };
+
+      chart.setOption(option);
+
+      // 响应窗口大小变化
+      window.addEventListener('resize', () => chart.resize());
+
+      return () => {
+        chart.dispose();
+        window.removeEventListener('resize', () => chart.resize());
+      };
+    }
+  }, [profitData]);
 
   const fetchInitialData = async () => {
     try {
@@ -376,21 +436,7 @@ const AutoTrading: React.FC = () => {
       <Row style={{ marginTop: 16 }}>
         <Col span={24}>
           <Card title="收益走势" bordered={false}>
-            <Line
-              data={profitData}
-              xField="date"
-              yField="value"
-              smooth
-              point={{
-                size: 2,
-                shape: 'circle',
-              }}
-              label={{
-                style: {
-                  fill: '#aaa',
-                },
-              }}
-            />
+            <div ref={chartRef} style={{ height: '400px' }} />
           </Card>
         </Col>
       </Row>

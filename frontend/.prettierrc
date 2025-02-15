@@ -1,22 +1,8 @@
 {
-  "dependencies": {
-    "@ant-design/plots": "^2.3.3",     // 图表库
-    "@ant-design/pro-components": "^2.8.5", // 高级UI组件
-    "@reduxjs/toolkit": "^2.5.1",      // 状态管理
-    "echarts": "^5.6.0",               // 图表库
-    "react-router-dom": "^6.29.0",     // 路由
-    "styled-components": "^6.1.15"      // CSS-in-JS
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.32.3",     // E2E测试
-    "@typescript-eslint/eslint-plugin": "^5.62.0", // TypeScript lint
-    "jest": "^29.5.0",                 // 单元测试
-    "vite": "^4.3.2"                   // 构建工具
-  },
   "semi": true,
   "trailingComma": "es5",
   "singleQuote": true,
   "printWidth": 100,
   "tabWidth": 2,
   "endOfLine": "auto"
-} 
+}

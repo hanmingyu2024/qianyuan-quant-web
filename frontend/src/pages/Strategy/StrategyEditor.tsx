@@ -3,7 +3,7 @@ import { Card, Form, Input, Select, Button, Space, Row, Col, InputNumber, Tabs }
 import MonacoEditor from '@monaco-editor/react';
 import { useDispatch } from 'react-redux';
 import { Strategy } from '../../store/slices/strategySlice';
-import { strategyApi } from '../../services/api';
+import { strategyApi } from '@/services';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
